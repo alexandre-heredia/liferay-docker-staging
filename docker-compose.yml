@@ -1,0 +1,99 @@
+services:
+
+  database:
+    image: mysql:8.3.0
+    environment:
+      - MYSQL_ROOT_PASSWORD=root
+    command: --character-set-server=utf8 --collation-server=utf8_general_ci --character-set-filesystem=utf8 --lower-case-table-names=0
+    volumes:
+       - ./mysql-scripts:/docker-entrypoint-initdb.d
+    ports:
+      - "3306:3306"
+    cap_add:
+      - SYS_NICE
+    networks:
+      network:
+        ipv4_address: 10.5.0.4
+    
+  stg:
+    image: liferay/dxp:2024.q4.0
+    environment:
+      #- LIFERAY_JPDA_ENABLED=true
+      - LIFERAY_JVM_OPTS=-Xms2g -Xmx3g
+      - LIFERAY_JDBC_PERIOD_DEFAULT_PERIOD_DRIVER_UPPERCASEC_LASS_UPPERCASEN_AME=com.mysql.cj.jdbc.Driver
+      - LIFERAY_JDBC_PERIOD_DEFAULT_PERIOD_URL=jdbc:mysql://database/lportalstg?characterEncoding=UTF-8&dontTrackOpenResources=true&holdResultsOpenOverStatementClose=true&serverTimezone=GMT&useFastDateParsing=false&useUnicode=true
+      - LIFERAY_JDBC_PERIOD_DEFAULT_PERIOD_USERNAME=root
+      - LIFERAY_JDBC_PERIOD_DEFAULT_PERIOD_PASSWORD=root
+      - LIFERAY_RETRY_PERIOD_JDBC_PERIOD_ON_PERIOD_STARTUP_PERIOD_DELAY=10
+      - LIFERAY_RETRY_PERIOD_JDBC_PERIOD_ON_PERIOD_STARTUP_PERIOD_MAX_PERIOD_RETRIES=20
+      - LIFERAY_MODULE_PERIOD_FRAMEWORK_PERIOD_PROPERTIES_PERIOD_OSGI_PERIOD_CONSOLE=0.0.0.0:11311
+      - LIFERAY_SETUP_PERIOD_WIZARD_PERIOD_ENABLED=false
+      - LIFERAY_COMPANY_PERIOD_DEFAULT_PERIOD_LOCALE=pt_BR
+      - LIFERAY_COMPANY_PERIOD_DEFAULT_PERIOD_TIME_PERIOD_ZONE=UTC-3
+      - LIFERAY_LOCALES=pt_BR,es_ES,en_US
+      - LIFERAY_LOCALES_PERIOD_ENABLED=pt_BR,es_ES,en_US
+      - LIFERAY_TUNNELING_PERIOD_SERVLET_PERIOD_SHARED_PERIOD_SECRET=6162636465666768696a6b6c6d6e6f70
+      - LIFERAY_TUNNELING_PERIOD_SERVLET_PERIOD_SHARED_PERIOD_SECRET_PERIOD_HEX=false
+      - LIFERAY_TUNNEL_PERIOD_SERVLET_PERIOD_HOSTS_PERIOD_ALLOWED=127.0.0.1,SERVER_IP,pub,10.5.0.6,10.5.0.5
+      - LIFERAY_TUNNEL_PERIOD_SERVLET_PERIOD_HTTPS_PERIOD_REQUIRED=false
+      - LIFERAY_VIRTUAL_PERIOD_HOSTS_PERIOD_VALID_PERIOD_HOSTS=localhost,127.0.0.1,10.5.0.6,10.5.0.5
+    ports:
+      - "8090:8080"
+      - "11310:11311"
+    volumes:
+      - ./liferay-stg-files:/mnt/liferay/files
+      - ./liferay-stg-deploy:/mnt/liferay/deploy
+      - ./liferay-stg-document-library:/opt/liferay/data/document_library
+      - ./liferay-stg-logs:/opt/liferay/logs
+      - ./liferay-stg-patching:/mnt/liferay/patching
+    networks:
+      network:
+        ipv4_address: 10.5.0.5
+    depends_on:
+      - database
+      
+  pub:
+    image: liferay/dxp:2024.q4.0
+    environment:
+      #- LIFERAY_JPDA_ENABLED=true
+      - LIFERAY_JVM_OPTS=-Xms2g -Xmx3g
+      - LIFERAY_JDBC_PERIOD_DEFAULT_PERIOD_DRIVER_UPPERCASEC_LASS_UPPERCASEN_AME=com.mysql.cj.jdbc.Driver
+      - LIFERAY_JDBC_PERIOD_DEFAULT_PERIOD_URL=jdbc:mysql://database/lportalpub?characterEncoding=UTF-8&dontTrackOpenResources=true&holdResultsOpenOverStatementClose=true&serverTimezone=GMT&useFastDateParsing=false&useUnicode=true
+      - LIFERAY_JDBC_PERIOD_DEFAULT_PERIOD_USERNAME=root
+      - LIFERAY_JDBC_PERIOD_DEFAULT_PERIOD_PASSWORD=root
+      - LIFERAY_RETRY_PERIOD_JDBC_PERIOD_ON_PERIOD_STARTUP_PERIOD_DELAY=10
+      - LIFERAY_RETRY_PERIOD_JDBC_PERIOD_ON_PERIOD_STARTUP_PERIOD_MAX_PERIOD_RETRIES=20
+      - LIFERAY_MODULE_PERIOD_FRAMEWORK_PERIOD_PROPERTIES_PERIOD_OSGI_PERIOD_CONSOLE=0.0.0.0:11311
+      - LIFERAY_SETUP_PERIOD_WIZARD_PERIOD_ENABLED=false
+      - LIFERAY_COMPANY_PERIOD_DEFAULT_PERIOD_LOCALE=pt_BR
+      - LIFERAY_COMPANY_PERIOD_DEFAULT_PERIOD_TIME_PERIOD_ZONE=UTC-3
+      - LIFERAY_LOCALES=pt_BR,es_ES,en_US
+      - LIFERAY_LOCALES_PERIOD_ENABLED=pt_BR,es_ES,en_US
+      - LIFERAY_TUNNELING_PERIOD_SERVLET_PERIOD_SHARED_PERIOD_SECRET=6162636465666768696a6b6c6d6e6f70
+      - LIFERAY_TUNNELING_PERIOD_SERVLET_PERIOD_SHARED_PERIOD_SECRET_PERIOD_HEX=false
+      - LIFERAY_TUNNEL_PERIOD_SERVLET_PERIOD_HOSTS_PERIOD_ALLOWED=127.0.0.1,SERVER_IP,stg,10.5.0.5,10.5.0.6
+      - LIFERAY_TUNNEL_PERIOD_SERVLET_PERIOD_HTTPS_PERIOD_REQUIRED=false
+      - LIFERAY_VIRTUAL_PERIOD_HOSTS_PERIOD_VALID_PERIOD_HOSTS=localhost,127.0.0.1,10.5.0.5, 15.5.0.6
+    ports:
+      - "8080:8080"
+      - "11311:11311"
+    volumes:
+      - ./liferay-pub-files:/mnt/liferay/files
+      - ./liferay-pub-deploy:/mnt/liferay/deploy
+      - ./liferay-pub-document-library:/opt/liferay/data/document_library
+      - ./liferay-pub-logs:/opt/liferay/logs
+      - ./liferay-pub-patching:/mnt/liferay/patching
+    networks:
+      network:
+        ipv4_address: 10.5.0.6
+    depends_on:
+      - database
+      - stg
+        
+networks:
+  network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 10.5.0.0/16
+          gateway: 10.5.0.1
