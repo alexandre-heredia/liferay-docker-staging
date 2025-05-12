@@ -4,7 +4,7 @@ A Docker Compose environment to create a Remote Staging/Live scenario using Life
 
 Because of the limitations of the environment, in order to this to work, the containers should have static IPs
 
-You can change both DXP and MySQL versions editing the ```docker-compose.yaml file```
+You can change both DXP and MySQL versions editing the ```docker-compose.yaml file```, but both STG and PUB containers should have the same version.
 
 **Pre-requirements:**
 Docker Engine or Docer Desktop installed
@@ -22,3 +22,5 @@ Docker Engine or Docer Desktop installed
 	- Remote Server IP: pub
 	- Remote port: 8080
 	- Remote Site ID: 20117
+
+DXP Remote Staging configurations official documentation: https://learn.liferay.com/w/dxp/site-building/publishing-tools/staging/configuring-remote-live-staging 
